@@ -1,0 +1,273 @@
+<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+<script>
+  function explandMenu() {
+    if ($('.page').hasClass('is-pushed')) {
+      $('.page').removeClass('is-pushed').css({
+        left: 0
+      });
+      $('#navi-expand').removeClass('is-expanded');
+    } else {
+      $('.page').addClass('is-pushed').css({
+        left: -200
+      });
+      $('#navi-expand').addClass('is-expanded');
+    }
+  }
+
+  function initDropdowns() {
+    $('.dropdown-toggle').each(function() {
+      $(this).unbind().click(function(e) {
+        e.preventDefault();
+        $(this).next('.dropdown-menu').toggleClass('show');
+        return false;
+      });
+    });
+
+    // Clicking anywhere else closes the dropdown
+    $('body').click(function(e) {
+      if (!e.target.closest('.dropdown')) {
+        $('.dropdown-menu.show').removeClass('show');
+      }
+    });
+  }
+
+  $(document).ready(function(e) {
+    $('.navi-menu').unbind().click(explandMenu);
+    initDropdowns();
+
+    if ($("#all_teams").length > 0) {
+      get_teams('0', '', '', '1');
+    }
+  });
+
+  // Team Search
+  function get_teams(start, tname, ename, all) {
+    if (typeof start == "undefined") start = 0;
+    if (typeof all == "undefined") all = 0;
+
+    $.ajax({
+      dataType: 'jsonp',
+      data: 'all=' + all + '&s=' + start + '&tname=' + tname + '&ename=' + ename,
+      jsonp: 'jsonp_callback',
+      contentType: 'application/json; charset=utf-8',
+      url: 'https://njsn-script.zurihosting.com/njsn_2017/nj5k/team_search.php',
+      success: function(data) {
+
+        $('#all_teams').html('');
+
+        if (data.teams.length > 0) {
+          start = parseInt(start);
+          var total = parseInt(data.total_results);
+          var perpage = parseInt(data.perpage);
+          var next = start + perpage;
+          var prev = start - perpage;
+          if (prev < 0) prev = 0;
+          var sr = '<div class="result-grid">';
+          sr += '  <div class="result-grid-header">';
+          sr += '    <div class="cell-large">Team Name</div>';
+          sr += '    <div class="cell-small">Team Captain</div>';
+          //sr += '    <div class="cell-large">Event Site</div>';
+          sr += '    <div class="cell-small">Team Total</div>';
+          sr += '    <div class="cell-small">&nbsp;</div>';
+          sr += '    <div class="cell-small">&nbsp;</div>';
+          sr += '  </div>';
+          sr += '  <div class="result-grid-body">';
+
+          for (i = 0; i < data.teams.length; i++) {
+            var t = data.teams[i];
+            evname = (t.count > 1) ? 'Multiple Events' : t.events[0].name;
+
+            sr += '    <div class="result-grid-row" data-events="' + encodeURIComponent(JSON.stringify(t.events)) + '">';
+            sr += '      <div class="cell-large"><a href="javascript:void(0)" onClick="teamAction(this)" data-action="page">' + t.name + '</a></div>';
+
+            // sr += '      <div class="cell-large"><a  target="_blank" href="http://events.njsharingnetwork.org/site/TR/Events/General?fr_id=' + t.event_id + '&pg=team&team_id=' + t.team_id + '">' + t.team_name + '</a></div>';
+
+            sr += '      <div class="cell-small"><span>Captain:</span> ' + t.captain + '</div>';
+            //	sr += '      <div class="cell-large">'+evname+'</div>';
+            sr += '      <div class="cell-small"><span>Raised:</span> $' + t.amount + '</div>';
+            sr += '      <div class="cell-button">';
+
+            sr += '    <div class="cell-small"><a  href="javascript:void(0)" onClick="teamAction(this)" data-action="donate">Contribute</a></div>';
+
+            // sr += '        <div class="cell-small"><a rel="count_' + t.count + '" data-tmc="' + t.team_name + '" target="_blank" href="http://events.njsharingnetwork.org/site/TR/Events/General?fr_id=' + t.event_id + '&pg=team&team_id=' + t.team_id + '">Contribute</a></div>';
+            sr += '        <div class="cell-small"><a  href="javascript:void(0)" onClick="teamAction(this)" data-action="join">Join</a></div>';
+            //  sr += '        <div class="cell-small"><a rel="count_' + t.count + '" data-tmc="' + t.team_name + '" target="_blank"  href="https://secure2.convio.net/njsn/site/TRR/Events/20205K?fr_tjoin=' + t.team_id + '&pg=tfind&fr_id=' + t.event_id + '">Join</a></div>';
+
+            sr += '      </div>';
+            sr += '    </div>';
+          }
+
+          sr += '  </div>';
+          sr += '  <div class="result-grid-paging">';
+
+          if (start != 0) {
+            sr += '<div class="prev_btn"><a href="javascript:void(0);" onclick="get_teams(\'' + prev + '\',\'' + tname + '\',\'' + ename + '\',\'' + all + '\')">&laquo; Previous Page</a></div>';
+          }
+          if (next < total) {
+            sr += '<div class="next_btn"><a href="javascript:void(0);" onclick="get_teams(\'' + next + '\',\'' + tname + '\',\'' + ename + '\',\'' + all + '\')">Next Page &raquo;</a></div>';
+          }
+
+          if (total > perpage) {
+            sr += '<div class="pages"><select name="page_choice" rel="team|' + tname + '|' + all + '" onchange="change_page(this)">';
+
+            for (p = 0; p < parseInt(data.pages); p++) {
+              var p2 = p + 1;
+
+              sr += '<option value="' + p + '" ' + ((p2 == data.current_page) ? 'selected="selected"' : '') + '>Page ' + p2 + '</option>';
+            }
+
+            sr += '</select></div>';
+          }
+
+          sr += '</div>';
+          sr += '</div>';
+          $("#search_results").html(sr);
+
+        } else {
+          $("#search_results").html('<p>No teams found</p>');
+        }
+        /*
+          if(all==1){
+            //$('html,body').scrollTo('#all_teams');
+          }else{
+            $('html,body').scrollTo('#interiorContent');
+          }
+          $("#ali").hide();
+        */
+      }
+    });
+  }
+
+  function teamAction(ele) {
+    $('#contextmenu').remove();
+    let data = $(ele).data('events');
+
+    if (!data) {
+      data = $(ele).parents('div.result-grid-row:eq(0)').data('events');
+    }
+
+    data = JSON.parse(decodeURIComponent(data));
+    let action = $(ele).data('action');
+    let url = '';
+
+    if (data.length == 1) {
+
+      if (action == 'join') {
+        url = 'https://secure2.convio.net/njsn/site/TRR/Events/20205K?fr_tjoin=' + data[0].team_id + '&pg=tfind&fr_id=' + data[0].id;
+      } else {
+        url = 'http://events.njsharingnetwork.org/site/TR/Events/General?fr_id=' + data[0].id + '&pg=team&team_id=' + data[0].team_id;
+      }
+
+      window.location.href = url;
+    } else {
+      // show context menu
+      let txt = '<div id="contextmenu">';
+
+      for (let i = 0; i < data.length; i++) {
+
+        if (action == 'join') {
+          url = 'https://secure2.convio.net/njsn/site/TRR/Events/20205K?fr_tjoin=' + data[i].team_id + '&pg=tfind&fr_id=' + data[i].id;
+        } else {
+          url = 'http://events.njsharingnetwork.org/site/TR/Events/General?fr_id=' + data[i].id + '&pg=team&team_id=' + data[i].team_id;
+        }
+        txt += '<a href="' + url + '" target="_blank">' + data[i].name + '</a>';
+      }
+
+      txt += '</div>';
+
+      $(document.body).append(txt);
+
+      let os = $(ele).offset();
+      $('#contextmenu').css({
+        left: os.left,
+        top: os.top + $(ele).height()
+      });
+
+
+    }
+
+  }
+
+  //participant search
+  function get_participants(start, name, ename) {
+    $("#ali").show();
+    if (typeof start == "undefined") start = 0;
+    $.ajax({
+      dataType: 'jsonp',
+      data: 's=' + start + '&name=' + name + '&ename=' + ename,
+      jsonp: 'jsonp_callback',
+      url: 'https://njsn-script.zurihosting.com/njsn_2017/nj5k/participant_search.php',
+      success: function(data) {
+
+        if (data.participants.length > 0) {
+          start = parseInt(data.start);
+          var regName = "";
+          var total = parseInt(data.total_results);
+          var perpage = parseInt(data.perpage);
+          var next = start + perpage;
+          var prev = start - perpage;
+          if (prev < 0) prev = 0;
+
+          var sr = '<div class="result-grid">';
+          sr += '  <div class="result-grid-header">';
+          sr += '    <div class="cell-large">Participant Name</div>';
+          sr += '    <div class="cell-small">Event</div>';
+          sr += '    <div class="cell-small">Team Name</div>';
+
+          sr += '    <div class="cell-small">Team Total</div>';
+          sr += '    <div class="cell-small">&nbsp;</div>';
+          sr += '  </div>';
+          sr += '  <div class="result-grid-body">';
+
+          for (i = 0; i < data.participants.length; i++) {
+
+            var w = data.participants[i];
+            var wname = w.fname + ' ' + w.lname;
+
+            sr += '    <div class="result-grid-row">';
+            sr += '<div class="cell-large"><a rel="count_" data-sid="' + w.supporter_id + '" target="_blank" href="http://events.njsharingnetwork.org/site/TR/Events/General?fr_id=' + w.event_id + '&pg=personal&px=' + w.supporter_id + '">' + w.fname + ' ' + w.lname + '</a></div>';
+
+            sr += '    <div class="cell-small">' + w.event_name.replace('2022 5K Celebration of Life -', '') + '</div>';
+            sr += '<div class="cell-small">' + w.team_name + '</div>';
+
+            sr += '<div class="cell-small">$' + w.amount_raised + '</div>';
+            sr += '<div class="cell-small"><div  class="cell-button" ><a rel="count_' + w.count + '" data-sid="' + w.supporter_id + '" target="_blank" href="http://events.njsharingnetwork.org/site/TR/Events/General?fr_id=' + w.event_id + '&pg=personal&px=' + w.supporter_id + '">Contribute</a></div></div>';
+            sr += '</div>'
+          }
+
+          sr += '  </div>';
+          sr += '  <div class="result-grid-paging">';
+
+          if (total > perpage) {
+            $("#ajax_results tr:last").after('<tr><td colspan="4" class="pagination_cell"><div class="ajax_pagination"></div></td>');
+
+            if (start != 0) sr += '<div class="prev_btn"><a href="javascript:void(0);" onclick="get_participants(\'' + prev + '\',\'' + name + '\',\'' + ename + '\')">&laquo; Previous Page</a></div>';
+
+            if (next < total) sr += '<div class="next_btn"><a href="javascript:void(0);" onclick="get_participants(\'' + next + '\',\'' + name + '\',\'' + ename + '\')">Next Page &raquo;</a></div>';
+          }
+
+          if (total > perpage) {
+            sr += '<div class="pages"><select name="page_choice" rel="walker|' + name + '|' + ename + '" onchange="change_page(this)">';
+
+            for (p = 0; p < parseInt(data.pages); p++) {
+              var p2 = p + 1;
+              var sel = '';
+              if (p2 == data.current_page) sel = 'selected="selected"';
+              sr += '<option value="' + p + '" ' + sel + '>Page ' + p2 + '</option>';
+            }
+            sr += '</select></div>';
+          }
+
+          sr += '</div>';
+          sr += '</div>';
+          $("#search_results").html(sr);
+          //$("#ajax_search_results").append('<div class="ajax_load_icon"><span id="ali"><img src="https://njsn.zurihosting.com/njsn_2017/nj5k/icon_ajaxloader.gif"/></span></div>');
+
+        } else {
+          $("#search_results").html('<p>No participants found</p>');
+        }
+
+      }
+    });
+  }
+</script>

@@ -1,0 +1,92 @@
+<style>
+#lightbox-login {
+	background-color: #fff;
+	box-sizing: border-box;
+	max-width: 100%;
+	overflow: visible;
+	padding: 2.111em 5% 1em;
+}
+
+#lightbox-login_mask {
+	background-color: rgba(0,0,0,.5);
+}
+
+#lightbox-login_c {
+	max-width: -webkit-calc(100% - 1em);
+	max-width: calc(100% - 1em);
+	z-index: 9999 !important;
+}
+
+#lightbox-login .container-close {
+	display: block;
+	font-size: 1em;
+	font-weight: 700;
+	line-height: 1;
+	outline-color: #006cdc;
+	padding: 2px 2px 2px calc(1em + 2px);
+	position: absolute;
+	right: 6px;
+	text-indent: 0;
+	top: 5px;
+	z-index: 10;
+}
+
+#lightbox-login .container-close::before {
+	bottom: 0;
+	content: "x";
+	font-size: 20px;
+	height: 1em;
+	left: 2px;
+	line-height: 0.9375;
+	margin: auto;
+	position: absolute;
+	top: 0;
+}
+
+#lightbox-login .hd, #lightbox-login h4 {
+	font-size: 16px;
+	font-weight: 700;
+}
+
+#lightbox-login hr {
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+.lightbox-login-form li, .lightbox-email-form li {
+	margin-top: 0.75em !important;
+}
+
+.lightbox-login-form input, .lightbox-email-form input {
+	width: 100% !important;
+}
+
+span.lightbox-login-form-left-column-spacer, span.lightbox-email-form-left-column-spacer {
+	display: none !important;
+}
+
+.lightbox-login-form button, .lightbox-email-form button {
+	margin: 0;
+	padding: 0.5em 1em;
+}
+
+.lightbox-login-form button, .lightbox-email-form button {
+	background: #006cdc;
+	color: #ffffff;
+	font-size: 14px;
+}
+
+#lightbox-login #lightbox-login-error:not(:empty) {
+	font-size: 0;
+}
+
+#lightbox-login #lightbox-login-error:not(:empty)::after {
+	font-size: 14px;
+	content: "The User Name or Password is invalid.";
+}
+#header {background-color: #ffffff !important}
+#header .navbar-header {
+ height:auto;
+ bottom: 0px;
+}
+</style>

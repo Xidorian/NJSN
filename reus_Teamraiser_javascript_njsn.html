@@ -1,0 +1,44 @@
+<script src="//code.jquery.com/jquery-1.12.3.min.js"></script>
+<script src="//netdna.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/luminateExtend/1.7.1/luminateExtend.min.js"></script>
+<script>
+    var jQuery1_12_3 = jQuery.noConflict(true);
+    var BBI = {
+        pageName: "[[S334:pg]]",
+        trID: "[[S80:trID]]"
+    };
+    jQuery1_12_3(function ($) {
+        luminateExtend.init({
+            apiKey: '[[S100:CONVIO_API_KEY]]',
+            path: {
+                nonsecure: 'http://[[S29:DOMAIN]][[S29:PATH]]',
+                secure: 'https://[[S29:SECURE_DOMAIN]][[S29:SECURE_PATH]]'
+            }
+        });
+    });
+
+	(function($) {
+		function teamPage() {
+			// Modifying side bar content only
+			var $side_bar = $('#team_page').children('.side-bar');
+
+			// Hide empy blocks
+			$side_bar.children('.tr-status-indicator-container').filter(function() {
+				return $.trim($(this).text()) === '';
+			});
+
+			// Place team blurb directly underneath Join Team button
+			$side_bar.find('.team-roster-legend').insertAfter('#join_team_button_container');
+		}
+
+		function loginLightbox() {
+			// clear error message block so CSS :empty selector can be applied
+			$('#lightbox-login-error').html('');
+		}
+
+		teamPage();
+		loginLightbox();
+	})(jQuery1_12_3);
+</script>
+<script src="//ws.sharethis.com/button/buttons.js"></script>
+<script src="../turbo-themes/njsn/static/js/template.js"></script>
